@@ -2,3 +2,6 @@
 Is there life on Mars?;Science doesn't know this yet%true|Certainly. The red UFO is from Mars. And green is from Venus%false|Absolutely not%false
 How should resources be loaded form jar in Java?;ClassLoader#geResourceAsStream or ClassPathResource#getInputStream%true|ClassLoader#geResource#getFile + FileReader%false|Wingardium Leviosa%false
 Which option is a good way to handle the exception?;@SneakyThrow%false|e.printStackTrace()%false|Rethrow with wrapping in business exception (for example, QuestionReadException)%true|Ignoring exception%false
+What is the correct way to start a thread in Java?;thread.start()%true|thread.run()%false|thread.execute()%false|Calling the run() method directly is enough%false
+Which HTTP method is idempotent and safe for retrieving data?;GET%true|POST%false|PUT%false|DELETE%false
+What is the default value of a local variable in Java?;null%false|0 or false or '' depending on type%false|It must be explicitly initialized%true|undefined%false
