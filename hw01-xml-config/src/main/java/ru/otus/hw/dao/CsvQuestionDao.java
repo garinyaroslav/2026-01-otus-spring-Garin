@@ -22,24 +22,25 @@ public class CsvQuestionDao implements QuestionDao {
 
     @Override
     public List<Question> findAll() {
-        try (InputStream inputStream = getClass().getClassLoader()
-                .getResourceAsStream(fileNameProvider.getTestFileName())) {
+        InputStream inputStream = getClass().getClassLoader()
+                .getResourceAsStream(fileNameProvider.getTestFileName());
 
-            if (inputStream == null) {
-                throw new QuestionReadException("File not found: " + fileNameProvider.getTestFileName());
-            }
+        if (inputStream == null) {
+            throw new QuestionReadException("File not found: " + fileNameProvider.getTestFileName());
+        }
 
-            try (Reader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                CsvToBean<QuestionDto> csvToBean = new CsvToBeanBuilder<QuestionDto>(reader)
-                        .withType(QuestionDto.class)
-                        .withSeparator(';')
-                        .withSkipLines(1)
-                        .build();
+        try (InputStream is = inputStream;
+                Reader reader = new BufferedReader(new InputStreamReader(is))) {
 
-                return csvToBean.parse().stream()
-                        .map(QuestionDto::toDomainObject)
-                        .collect(Collectors.toList());
-            }
+            CsvToBean<QuestionDto> csvToBean = new CsvToBeanBuilder<QuestionDto>(reader)
+                    .withType(QuestionDto.class)
+                    .withSeparator(';')
+                    .withSkipLines(1)
+                    .build();
+
+            return csvToBean.parse().stream()
+                    .map(QuestionDto::toDomainObject)
+                    .collect(Collectors.toList());
 
         } catch (Exception e) {
             throw new QuestionReadException("Error reading questions from CSV", e);
