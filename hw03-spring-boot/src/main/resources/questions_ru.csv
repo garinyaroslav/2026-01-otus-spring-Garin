@@ -1,0 +1,7 @@
+# Добавить сюда вопросы своих. Этот текст нужно пропустить при настройке CsvToBean (withSkipLines)
+Есть ли жизнь на Марсе?;Наука этого пока не знает%true|Конечно. Красный НЛО прибыл с Марса. А зелёный цвет с Венеры%false|Абсолютно нет%false
+Как следует загружать ресурсы из jar-файла в Java?;ClassLoader#geResourceAsStream или ClassPathResource#getInputStream%true|ClassLoader#geResource#getFile + FileReader%false|Wingardium Leviosa%false
+Какой вариант является хорошим способом обработки исключения?;@SneakyThrow%false|e.printStackTrace()%false|Повторно выбросить с обертыванием в бизнес-исключение (например, QuestionReadException)%true|Игнорирование исключения%false
+Как правильно запустить поток в Java?;thread.start()%true|thread.run()%false|thread.execute()%false|Достаточно прямого вызова метода run()%false
+Какой HTTP-метод является идемпотентным и безопасным для получения данных? данные?;GET%true|POST%false|PUT%false|DELETE%false
+Каково значение по умолчанию локальной переменной в Java?;null%false|0 или false или '' в зависимости от типа%false|Ее необходимо инициализировать явно%true|undefined%false
