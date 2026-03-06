@@ -129,14 +129,16 @@ public class JdbcBookRepository implements BookRepository {
             Book book = bookById.get(relation.bookId());
             Genre genre = genreById.get(relation.genreId());
 
-            if (book != null && genre != null)
+            if (book != null && genre != null) {
                 book.getGenres().add(genre);
+            }
         });
     }
 
     private Book insert(Book book) {
-        if (book == null)
+        if (book == null) {
             throw new RuntimeException("book cannot be null");
+        }
 
         var keyHolder = new GeneratedKeyHolder();
 
@@ -158,8 +160,9 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private Book update(Book book) {
-        if (book == null)
+        if (book == null) {
             throw new RuntimeException("book cannot be null");
+        }
 
         Author author = book.getAuthor();
         int updatingCount;
@@ -173,8 +176,9 @@ public class JdbcBookRepository implements BookRepository {
             throw new RuntimeException("Exceptions while updating book: " + book);
         }
 
-        if (updatingCount < 1)
+        if (updatingCount < 1) {
             throw new EntityNotFoundException("Not found book with id = " + book.getId());
+        }
 
         removeGenresRelationsFor(book);
         batchInsertGenresRelationsFor(book);
@@ -183,8 +187,9 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private void batchInsertGenresRelationsFor(Book book) {
-        if (book == null || book.getGenres() == null)
+        if (book == null || book.getGenres() == null) {
             return;
+        }
 
         List<Genre> genres = book.getGenres();
 
@@ -203,8 +208,9 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private void removeGenresRelationsFor(Book book) {
-        if (book == null || book.getGenres() == null)
+        if (book == null || book.getGenres() == null) {
             return;
+        }
 
         long bookId = book.getId();
 
