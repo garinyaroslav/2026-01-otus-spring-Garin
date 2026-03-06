@@ -35,7 +35,6 @@ public class JdbcBookRepository implements BookRepository {
     @Override
     public Optional<Book> findById(long id) {
         Book res;
-
         try {
             res = jdbc.query(
                     """
@@ -56,7 +55,6 @@ public class JdbcBookRepository implements BookRepository {
         } catch (DataAccessException ex) {
             throw new EntityNotFoundException("Exceptions while getting book");
         }
-
         return Optional.ofNullable(res);
     }
 
@@ -166,7 +164,6 @@ public class JdbcBookRepository implements BookRepository {
 
         Author author = book.getAuthor();
         int updatingCount;
-
         try {
             updatingCount = jdbc.update("update books set title = :title, author_id = :authorId where id = :id",
                     new MapSqlParameterSource().addValue("id", book.getId(), Types.BIGINT)
