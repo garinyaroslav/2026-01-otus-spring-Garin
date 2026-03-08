@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("Тест сервиса тестирования")
-@SpringBootTest(classes = TestServiceImpl.class, properties = "spring.shell.interactive.enabled=false")
+@SpringBootTest(classes = TestServiceImpl.class)
 class TestServiceImplTest {
 
     @MockitoBean

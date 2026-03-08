@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @DisplayName("Класс CsvQuestionDao")
-@SpringBootTest(classes = CsvQuestionDao.class, properties = "spring.shell.interactive.enabled=false")
+@SpringBootTest(classes = CsvQuestionDao.class)
 class CsvQuestionDaoTest {
 
     @MockitoBean
