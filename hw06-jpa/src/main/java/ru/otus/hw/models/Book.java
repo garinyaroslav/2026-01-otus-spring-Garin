@@ -40,7 +40,11 @@ public class Book {
     private Author author;
 
     @ManyToMany
-    @JoinTable(name = "books_genres", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    @JoinTable(
+        name = "books_genres",
+        joinColumns = @JoinColumn(name = "book_id"),
+        inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
     private List<Genre> genres;
 
     @ToString.Exclude
