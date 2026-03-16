@@ -11,27 +11,32 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
 @Table(name = "authors")
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Author {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
+    @EqualsAndHashCode.Include
     private long id;
 
     @Column(name = "full_name")
+    @ToString.Include
     private String fullName;
 
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private List<Book> books;
-
 }

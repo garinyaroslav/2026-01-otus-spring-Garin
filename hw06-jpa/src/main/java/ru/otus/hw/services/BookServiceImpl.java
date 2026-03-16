@@ -8,7 +8,6 @@ import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
-import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
 import java.util.List;
@@ -25,8 +24,6 @@ public class BookServiceImpl implements BookService {
     private final GenreRepository genreRepository;
 
     private final BookRepository bookRepository;
-
-    private final CommentRepository commentRepository;
 
     @Override
     public Optional<Book> findById(long id) {
@@ -67,9 +64,8 @@ public class BookServiceImpl implements BookService {
         if (isEmpty(genres) || genresIds.size() != genres.size()) {
             throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
         }
-        var comments = commentRepository.findAllByBookId(id);
 
-        var book = new Book(id, title, author, genres, comments);
+        var book = new Book(id, title, author, genres);
         return bookRepository.save(book);
     }
 }

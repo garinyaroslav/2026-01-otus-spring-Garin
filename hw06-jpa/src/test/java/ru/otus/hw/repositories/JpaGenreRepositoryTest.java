@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import ru.otus.hw.models.Genre;
 
@@ -19,36 +18,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JpaGenreRepositoryTest {
 
     @Autowired
-    private TestEntityManager em;
-
-    @Autowired
     private JpaGenreRepository genreRepository;
 
     @DisplayName("должен загружать все жанры")
     @Test
     void shouldFindAll() {
-        em.persistAndFlush(new Genre(0, "genre1"));
-        em.persistAndFlush(new Genre(0, "genre2"));
+        var genres = genreRepository.findAll();
 
-        List<Genre> genres = genreRepository.findAll();
-
-        assertThat(genres).hasSizeGreaterThanOrEqualTo(2);
-        assertThat(genres).extracting(Genre::getName)
-                .contains("genre1", "genre2");
+        assertThat(genres)
+                .usingRecursiveComparison()
+                .isEqualTo(List.of(
+                        new Genre(1L, "Genre1"),
+                        new Genre(2L, "Genre2"),
+                        new Genre(3L, "Genre3")));
     }
 
     @DisplayName("должен загружать жанры по списку id")
     @Test
     void shouldFindAllByIds() {
-        var g1 = em.persistAndFlush(new Genre(0, "Drama"));
-        var g2 = em.persistAndFlush(new Genre(0, "Comedy"));
-        em.persistAndFlush(new Genre(0, "Thriller"));
+        var found = genreRepository.findAllByIds(Set.of(1L, 2L));
 
-        List<Genre> found = genreRepository.findAllByIds(Set.of(g1.getId(), g2.getId()));
-
-        assertThat(found).hasSize(2);
-        assertThat(found).extracting(Genre::getName)
-                .containsExactlyInAnyOrder("Drama", "Comedy");
+        assertThat(found)
+                .usingRecursiveComparison()
+                .isEqualTo(List.of(
+                        new Genre(1L, "Genre1"),
+                        new Genre(2L, "Genre2")));
     }
-
 }
