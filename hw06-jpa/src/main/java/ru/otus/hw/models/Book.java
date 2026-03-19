@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -25,7 +26,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@NamedEntityGraph(name = "book-author-graph", attributeNodes = @NamedAttributeNode("author"))
+@NamedEntityGraphs({
+        @NamedEntityGraph(name = "book-author-graph", attributeNodes = @NamedAttributeNode("author")),
+        @NamedEntityGraph(name = "book-author-genres-graph", attributeNodes = {
+                @NamedAttributeNode("author"),
+                @NamedAttributeNode("genres")
+        })
+})
 @Table(name = "books")
 @Getter
 @Setter
@@ -50,11 +57,7 @@ public class Book {
     private Author author;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "books_genres",
-        joinColumns = @JoinColumn(name = "book_id"),
-        inverseJoinColumns = @JoinColumn(name = "genre_id")
-    )
+    @JoinTable(name = "books_genres", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "genre_id"))
     @BatchSize(size = 20)
     private List<Genre> genres;
 

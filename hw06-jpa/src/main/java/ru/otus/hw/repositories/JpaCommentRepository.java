@@ -29,4 +29,23 @@ public class JpaCommentRepository implements CommentRepository {
         return query.setParameter("bookId", bookId).getResultList();
     }
 
+    @Override
+    public Comment save(Comment comment) {
+        if (comment.getId() == 0) {
+            em.persist(comment);
+            return comment;
+        }
+
+        return em.merge(comment);
+    }
+
+    @Override
+    public void deleteById(long id) {
+        Comment comment = em.find(Comment.class, id);
+
+        if (comment != null) {
+            em.remove(comment);
+        }
+    }
+
 }
