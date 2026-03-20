@@ -1,0 +1,7 @@
+/home/yar/Projects/Studies/2026-01-otus-spring-Garin/hw07-data-jpa/src/test/java/ru/otus/hw/models/ModelsCommonTest.java
+/home/yar/Projects/Studies/2026-01-otus-spring-Garin/hw07-data-jpa/src/test/java/ru/otus/hw/repositories/AuthorRepositoryTest.java
+/home/yar/Projects/Studies/2026-01-otus-spring-Garin/hw07-data-jpa/src/test/java/ru/otus/hw/repositories/BookRepositoryTest.java
+/home/yar/Projects/Studies/2026-01-otus-spring-Garin/hw07-data-jpa/src/test/java/ru/otus/hw/repositories/CommentRepositoryTest.java
+/home/yar/Projects/Studies/2026-01-otus-spring-Garin/hw07-data-jpa/src/test/java/ru/otus/hw/repositories/GenreRepositoryTest.java
+/home/yar/Projects/Studies/2026-01-otus-spring-Garin/hw07-data-jpa/src/test/java/ru/otus/hw/services/BookServiceTest.java
+/home/yar/Projects/Studies/2026-01-otus-spring-Garin/hw07-data-jpa/src/test/java/ru/otus/hw/services/CommentServiceTest.java
