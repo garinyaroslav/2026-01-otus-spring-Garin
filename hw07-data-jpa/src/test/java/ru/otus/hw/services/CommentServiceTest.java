@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DisplayName("Тест сервиса комментариев")
 @SpringBootTest
@@ -26,12 +25,18 @@ class CommentServiceTest {
     @DisplayName("findById возвращает комментарий с доступной книгой снаружи транзакции")
     void findById_shouldReturnCommentWithAccessibleBook() {
         Optional<Comment> result = commentService.findById(1L);
-
         assertThat(result).isPresent();
 
-        assertThatCode(() -> {
-            assertThat(result.get().getText()).isNotBlank();
-        }).doesNotThrowAnyException();
+        Comment expected = new Comment();
+        expected.setId(1L);
+        expected.setText("Comment 1");
+
+        assertThat(result.get())
+                .usingRecursiveComparison()
+                .ignoringFields("book")
+                .isEqualTo(expected);
+        assertThat(result.get().getBook()).isNotNull();
+        assertThat(result.get().getBook().getId()).isEqualTo(1L);
     }
 
     @Test
@@ -40,29 +45,41 @@ class CommentServiceTest {
         List<Comment> comments = commentService.findAllByBookId(1L);
 
         assertThat(comments).isNotEmpty();
-
-        assertThatCode(() -> comments.forEach(c -> assertThat(c.getText()).isNotBlank())).doesNotThrowAnyException();
+        assertThat(comments).allSatisfy(c -> {
+            assertThat(c.getId()).isGreaterThan(0);
+            assertThat(c.getText()).isNotBlank();
+        });
     }
 
     @Test
     @DisplayName("insert сохраняет комментарий")
     void insert_shouldPersistComment() {
-        Comment comment = commentService.insert(1L, "Great book!");
+        Comment actual = commentService.insert(1L, "Great book!");
 
-        assertThat(comment.getId()).isGreaterThan(0);
-        assertThat(comment.getText()).isEqualTo("Great book!");
+        Comment expected = new Comment();
+        expected.setText("Great book!");
+
+        assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields("id", "book")
+                .isEqualTo(expected);
+        assertThat(actual.getId()).isGreaterThan(0);
     }
 
     @Test
     @DisplayName("update обновляет текст комментария")
     void update_shouldUpdateCommentText() {
-        commentService.insert(1L, "Initial text");
-        List<Comment> all = commentService.findAllByBookId(1L);
-        long id = all.get(all.size() - 1).getId();
+        Comment inserted = commentService.insert(1L, "Initial text");
+        Comment updated = commentService.update(inserted.getId(), "Updated text");
 
-        Comment updated = commentService.update(id, "Updated text");
+        Comment expected = new Comment();
+        expected.setId(inserted.getId());
+        expected.setText("Updated text");
 
-        assertThat(updated.getText()).isEqualTo("Updated text");
+        assertThat(updated)
+                .usingRecursiveComparison()
+                .ignoringFields("book")
+                .isEqualTo(expected);
     }
 
     @Test
@@ -74,4 +91,5 @@ class CommentServiceTest {
 
         assertThat(commentService.findById(inserted.getId())).isEmpty();
     }
+
 }

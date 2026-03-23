@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
@@ -13,9 +15,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
-@DisplayName("тест сервиса книг")
+@DisplayName("Тест сервиса книг")
 @SpringBootTest
 @Transactional(propagation = Propagation.NEVER)
 class BookServiceTest {
@@ -29,65 +30,86 @@ class BookServiceTest {
         List<Book> books = bookService.findAll();
 
         assertThat(books).isNotEmpty();
-
-        assertThatCode(() -> books.forEach(book -> {
+        assertThat(books).allSatisfy(book -> {
             assertThat(book.getAuthor()).isNotNull();
             assertThat(book.getAuthor().getFullName()).isNotBlank();
-            assertThat(book.getGenres()).isNotNull();
-        })).doesNotThrowAnyException();
+            assertThat(book.getGenres()).isNotNull().isNotEmpty();
+        });
     }
 
     @Test
     @DisplayName("findById возвращает книгу с инициализированными автором и жанрами")
     void findById_shouldReturnBookWithInitializedRelations() {
-        Optional<Book> result = bookService.findById(1L);
-
+        Optional<Book> result = bookService.findById(2L);
         assertThat(result).isPresent();
 
-        assertThatCode(() -> {
-            Book book = result.get();
-            assertThat(book.getAuthor()).isNotNull();
-            assertThat(book.getAuthor().getFullName()).isNotBlank();
-            assertThat(book.getGenres()).isNotEmpty();
-        }).doesNotThrowAnyException();
+        Book expected = new Book();
+        expected.setId(2L);
+        expected.setTitle("Book B");
+
+        Author expectedAuthor = new Author();
+        expectedAuthor.setId(2L);
+        expected.setAuthor(expectedAuthor);
+
+        assertThat(result.get())
+                .usingRecursiveComparison()
+                .ignoringFields("genres", "author.fullName", "author.books")
+                .isEqualTo(expected);
+        assertThat(result.get().getAuthor().getFullName()).isNotBlank();
+        assertThat(result.get().getGenres()).isNotEmpty();
     }
 
     @Test
     @DisplayName("insert сохраняет и возвращает книгу с доступными связями")
     void insert_shouldPersistAndReturnBookWithRelations() {
-        Book book = bookService.insert("New Book", 1L, Set.of(1L, 2L));
+        Book actual = bookService.insert("New Book", 1L, Set.of(1L, 2L));
 
-        assertThat(book).isNotNull();
-        assertThat(book.getId()).isGreaterThan(0);
+        Book expected = new Book();
+        expected.setTitle("New Book");
 
-        assertThatCode(() -> {
-            assertThat(book.getAuthor().getFullName()).isNotBlank();
-            assertThat(book.getGenres()).hasSize(2);
-        }).doesNotThrowAnyException();
+        Author expectedAuthor = new Author();
+        expectedAuthor.setId(1L);
+        expected.setAuthor(expectedAuthor);
+
+        assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields("id", "author.fullName", "author.books", "genres")
+                .isEqualTo(expected);
+        assertThat(actual.getId()).isGreaterThan(0);
+        assertThat(actual.getGenres()).hasSize(2);
+        assertThat(actual.getAuthor().getFullName()).isNotBlank();
     }
 
     @Test
     @DisplayName("update обновляет книгу и возвращает актуальные данные")
     void update_shouldUpdateAndReturnBook() {
-        Book book = bookService.update(1L, "Updated Title", 1L, Set.of(1L));
+        Book toUpdate = bookService.insert("Original Title", 1L, Set.of(1L));
+        Book actual = bookService.update(toUpdate.getId(), "Updated Title", 1L, Set.of(1L));
 
-        assertThat(book.getTitle()).isEqualTo("Updated Title");
+        Book expected = new Book();
+        expected.setId(toUpdate.getId());
+        expected.setTitle("Updated Title");
 
-        assertThatCode(() -> {
-            assertThat(book.getAuthor()).isNotNull();
-            assertThat(book.getGenres()).hasSize(1);
-        }).doesNotThrowAnyException();
+        Author expectedAuthor = new Author();
+        expectedAuthor.setId(1L);
+        expected.setAuthor(expectedAuthor);
+
+        assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields("author.fullName", "author.books", "genres")
+                .isEqualTo(expected);
+        assertThat(actual.getAuthor()).isNotNull();
+        assertThat(actual.getGenres()).hasSize(1);
     }
 
     @Test
     @DisplayName("deleteById удаляет книгу")
     void deleteById_shouldDeleteBook() {
-        bookService.insert("To Delete", 1L, Set.of(1L));
-        List<Book> before = bookService.findAll();
-        long idToDelete = before.get(before.size() - 1).getId();
+        Book inserted = bookService.insert("To Delete", 1L, Set.of(1L));
 
-        bookService.deleteById(idToDelete);
+        bookService.deleteById(inserted.getId());
 
-        assertThat(bookService.findById(idToDelete)).isEmpty();
+        assertThat(bookService.findById(inserted.getId())).isEmpty();
     }
+
 }
