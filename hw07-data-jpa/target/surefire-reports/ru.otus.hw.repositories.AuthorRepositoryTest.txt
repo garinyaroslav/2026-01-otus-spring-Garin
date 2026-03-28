@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: ru.otus.hw.repositories.AuthorRepositoryTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in ru.otus.hw.repositories.AuthorRepositoryTest
