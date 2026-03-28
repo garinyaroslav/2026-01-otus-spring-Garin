@@ -1,0 +1,37 @@
+package ru.otus.hw.models;
+
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
+import java.util.List;
+
+@Document(collection = "books")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Book {
+
+    @Id
+    @ToString.Include
+    @EqualsAndHashCode.Include
+    private String id;
+
+    @ToString.Include
+    private String title;
+
+    @DocumentReference
+    private Author author;
+
+    @DocumentReference
+    private List<Genre> genres;
+
+}
