@@ -19,7 +19,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <spring.shell.version>3.2.4</spring.shell.version>
-        <!-- <flapdoodle.embed.mongo.version>4.22.0</flapdoodle.embed.mongo.version> -->
+        <testcontainers.version>1.21.4</testcontainers.version>
         <reflections.version>0.10.2</reflections.version>
         <checkstyle-plugin.version>3.3.1</checkstyle-plugin.version>
         <checkstyle.version>10.15.0</checkstyle.version>
@@ -52,12 +52,26 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- <dependency> -->
-        <!--     <groupId>de.flapdoodle.embed</groupId> -->
-        <!--     <artifactId>de.flapdoodle.embed.mongo.spring30x</artifactId> -->
-        <!--     <version>${flapdoodle.embed.mongo.version}</version> -->
-        <!--     <scope>test</scope> -->
-        <!-- </dependency> -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mongodb</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.reflections</groupId>

@@ -5,8 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
+
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.GenreRepository;
 
@@ -17,8 +24,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Сервис жанров")
 @SpringBootTest
 @ActiveProfiles("test")
+@Testcontainers
 @Transactional(propagation = Propagation.NEVER)
 class GenreServiceTest {
+
+    @Container
+    static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:7.0.14"));
+
+    @DynamicPropertySource
+    static void setMongoProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    }
 
     @Autowired
     private GenreService genreService;
@@ -45,9 +61,11 @@ class GenreServiceTest {
         }
     }
 
-    @DisplayName("findAll должен возвращать непустой список (seed-данные присутствуют)")
+    @DisplayName("findAll должен возвращать непустой список")
     @Test
     void findAll_shouldReturnNonEmptyList() {
+        genreRepository.save(new Genre(null, "Genre from test"));
+
         List<Genre> actual = genreService.findAll();
 
         assertThat(actual).isNotEmpty();

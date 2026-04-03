@@ -5,8 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
+
 import ru.otus.hw.models.Author;
 import ru.otus.hw.repositories.AuthorRepository;
 
@@ -17,8 +24,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Сервис авторов")
 @SpringBootTest
 @ActiveProfiles("test")
+@Testcontainers
 @Transactional(propagation = Propagation.NEVER)
 class AuthorServiceTest {
+
+    @Container
+    static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:7.0.14"));
+
+    @DynamicPropertySource
+    static void setMongoProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    }
 
     @Autowired
     private AuthorService authorService;
@@ -45,9 +61,11 @@ class AuthorServiceTest {
         }
     }
 
-    @DisplayName("findAll должен возвращать непустой список (seed-данные присутствуют)")
+    @DisplayName("findAll должен возвращать непустой список")
     @Test
     void findAll_shouldReturnNonEmptyList() {
+        authorRepository.save(new Author(null, "Test Author X"));
+
         List<Author> actual = authorService.findAll();
 
         assertThat(actual).isNotEmpty();

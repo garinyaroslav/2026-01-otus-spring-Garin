@@ -1,9 +1,6 @@
 spring:
   data:
     mongodb:
-  mongodb:
-    embedded:
-      version: 7.0.14
   shell:
     interactive:
       enabled: false
