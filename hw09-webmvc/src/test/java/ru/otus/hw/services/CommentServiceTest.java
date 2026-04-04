@@ -4,9 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.models.Comment;
+import ru.otus.hw.repositories.BookRepository;
 
 import java.util.List;
 
@@ -14,23 +13,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Тест сервиса комментариев")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Transactional(propagation = Propagation.NEVER)
 class CommentServiceTest {
 
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private BookRepository bookRepository;
+
+    private static final long EXISTING_BOOK_ID = 1L;
+
     @DisplayName("findById должен возвращать комментарий с доступной книгой")
     @Test
     void findById_shouldReturnCommentWithAccessibleBook() {
-        var inserted = commentService.insert(1L, "Test comment");
+        assertThat(bookRepository.findById(EXISTING_BOOK_ID)).isPresent();
 
+        var inserted = commentService.insert(EXISTING_BOOK_ID, "Test comment");
         var found = commentService.findById(inserted.getId());
 
         assertThat(found).isPresent();
         assertThat(found.get().getText()).isEqualTo("Test comment");
         assertThat(found.get().getBook()).isNotNull();
-        assertThat(found.get().getBook().getId()).isEqualTo(1L);
+        assertThat(found.get().getBook().getId()).isEqualTo(EXISTING_BOOK_ID);
 
         commentService.deleteById(inserted.getId());
     }
@@ -38,12 +42,13 @@ class CommentServiceTest {
     @DisplayName("findAllByBookId должен возвращать все комментарии книги")
     @Test
     void findAllByBookId_shouldReturnComments() {
-        var c1 = commentService.insert(1L, "Comment Alpha");
-        var c2 = commentService.insert(1L, "Comment Beta");
+        var c1 = commentService.insert(EXISTING_BOOK_ID, "Comment Alpha");
+        var c2 = commentService.insert(EXISTING_BOOK_ID, "Comment Beta");
 
-        List<Comment> comments = commentService.findAllByBookId(1L);
+        List<Comment> comments = commentService.findAllByBookId(EXISTING_BOOK_ID);
 
         assertThat(comments)
+                .hasSizeGreaterThanOrEqualTo(2)
                 .extracting(Comment::getText)
                 .contains("Comment Alpha", "Comment Beta");
 
@@ -54,11 +59,11 @@ class CommentServiceTest {
     @DisplayName("insert должен сохранять комментарий")
     @Test
     void insert_shouldPersistComment() {
-        var saved = commentService.insert(1L, "New comment");
+        var saved = commentService.insert(EXISTING_BOOK_ID, "New comment");
 
         assertThat(saved.getId()).isGreaterThan(0);
         assertThat(saved.getText()).isEqualTo("New comment");
-        assertThat(saved.getBook().getId()).isEqualTo(1L);
+        assertThat(saved.getBook().getId()).isEqualTo(EXISTING_BOOK_ID);
 
         commentService.deleteById(saved.getId());
     }
@@ -66,10 +71,11 @@ class CommentServiceTest {
     @DisplayName("update должен обновлять текст комментария")
     @Test
     void update_shouldUpdateCommentText() {
-        var saved = commentService.insert(1L, "Old text");
+        var saved = commentService.insert(EXISTING_BOOK_ID, "Old text");
         var updated = commentService.update(saved.getId(), "New text");
 
         assertThat(updated.getText()).isEqualTo("New text");
+        assertThat(updated.getBook().getId()).isEqualTo(EXISTING_BOOK_ID);
 
         commentService.deleteById(saved.getId());
     }
@@ -77,8 +83,7 @@ class CommentServiceTest {
     @DisplayName("deleteById должен удалять комментарий")
     @Test
     void deleteById_shouldDeleteComment() {
-        var saved = commentService.insert(1L, "To be deleted");
-
+        var saved = commentService.insert(EXISTING_BOOK_ID, "To be deleted");
         commentService.deleteById(saved.getId());
 
         assertThat(commentService.findById(saved.getId())).isEmpty();
