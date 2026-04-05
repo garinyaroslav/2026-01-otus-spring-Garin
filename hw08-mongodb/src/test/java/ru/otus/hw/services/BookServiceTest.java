@@ -16,7 +16,6 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -26,7 +25,6 @@ import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -87,40 +85,33 @@ class BookServiceTest {
         bookService.insert("Book C", testAuthors.get(0).getId(), Set.of(testGenres.get(2).getId()));
     }
 
-    @DisplayName("findAll должен возвращать книги с инициализированными жанрами и автором")
+    @DisplayName("findAll должен возвращать книги")
     @Test
-    void findAll_shouldReturnBooksWithInitializedRelations() {
+    void findAll_shouldReturnBooks() {
         List<Book> books = bookService.findAll();
 
         assertThat(books).hasSize(3);
-        assertThat(books).allSatisfy(book -> {
-            assertThat(book.getAuthor()).isNotNull();
-            assertThat(book.getAuthor().getFullName()).isNotBlank();
-            assertThat(book.getGenres()).isNotNull().isNotEmpty();
-        });
     }
 
-    @DisplayName("findById должен возвращать книгу с инициализированными связями")
+    @DisplayName("findById должен возвращать книгу")
     @ParameterizedTest
     @MethodSource("getTestBookTitles")
     void shouldReturnCorrectBookById(String expectedTitle) {
-        Optional<Book> result = bookService.findAll().stream()
+        var result = bookService.findAll().stream()
                 .filter(b -> b.getTitle().equals(expectedTitle))
                 .findFirst();
 
-        assertThat(result)
-                .as("Книга '%s' должна существовать", expectedTitle)
-                .isPresent();
+        assertThat(result).as(expectedTitle).isPresent();
 
-        assertThat(result.get().getTitle()).isEqualTo(expectedTitle);
-        assertThat(result.get().getAuthor()).isNotNull();
-        assertThat(result.get().getAuthor().getFullName()).isNotBlank();
-        assertThat(result.get().getGenres()).isNotEmpty();
+        Book book = result.get();
+        assertThat(book.getTitle()).isEqualTo(expectedTitle);
+        assertThat(book.getAuthorId()).isNotNull();
+        assertThat(book.getGenreIds()).isNotEmpty();
     }
 
-    @DisplayName("insert должен сохранять книгу и возвращать её с корректными связями")
+    @DisplayName("insert должен сохранять книгу")
     @Test
-    void insert_shouldPersistAndReturnBookWithRelations() {
+    void insert_shouldPersistAndReturnBook() {
         Book actual = bookService.insert(
                 "New Book",
                 testAuthors.get(0).getId(),
@@ -128,12 +119,11 @@ class BookServiceTest {
 
         assertThat(actual.getId()).isNotNull();
         assertThat(actual.getTitle()).isEqualTo("New Book");
-        assertThat(actual.getAuthor()).isNotNull();
-        assertThat(actual.getAuthor().getFullName()).isNotBlank();
-        assertThat(actual.getGenres()).hasSize(2);
+        assertThat(actual.getAuthorId()).isEqualTo(testAuthors.get(0).getId());
+        assertThat(actual.getGenreIds()).hasSize(2);
     }
 
-    @DisplayName("update должен обновлять книгу и возвращать актуальные данные")
+    @DisplayName("update должен обновлять книгу")
     @Test
     void update_shouldUpdateAndReturnBook() {
         Book toUpdate = bookService.insert(
@@ -148,9 +138,8 @@ class BookServiceTest {
                 Set.of(testGenres.get(1).getId(), testGenres.get(2).getId()));
 
         assertThat(actual.getTitle()).isEqualTo("Updated Title");
-        assertThat(actual.getAuthor().getId()).isEqualTo(testAuthors.get(1).getId());
-        assertThat(actual.getGenres()).hasSize(2);
-        assertThat(actual.getAuthor().getFullName()).isNotBlank();
+        assertThat(actual.getAuthorId()).isEqualTo(testAuthors.get(1).getId());
+        assertThat(actual.getGenreIds()).hasSize(2);
     }
 
     @DisplayName("deleteById должен удалять книгу и все связанные с ней комментарии")
@@ -162,6 +151,7 @@ class BookServiceTest {
                 Set.of(testGenres.get(0).getId()));
 
         String bookId = bookToDelete.getId();
+
         commentService.insert(bookId, "Comment 1");
         commentService.insert(bookId, "Comment 2");
 

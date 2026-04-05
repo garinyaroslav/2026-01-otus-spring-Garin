@@ -48,7 +48,7 @@ public class BookServiceImpl implements BookService {
             throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
         }
 
-        return bookRepository.save(new Book(null, title, author, genres));
+        return bookRepository.save(new Book(null, title, author.getId(), List.copyOf(genresIds)));
     }
 
     @Override
@@ -65,15 +65,15 @@ public class BookServiceImpl implements BookService {
         }
 
         book.setTitle(title);
-        book.setAuthor(author);
-        book.setGenres(genres);
+        book.setAuthorId(author.getId());
+        book.setGenreIds(List.copyOf(genresIds));
 
         return bookRepository.save(book);
     }
 
     @Override
     public void deleteById(String id) {
-        bookRepository.deleteByIdWithCascade(id);
+        bookRepository.deleteById(id);
     }
 
 }

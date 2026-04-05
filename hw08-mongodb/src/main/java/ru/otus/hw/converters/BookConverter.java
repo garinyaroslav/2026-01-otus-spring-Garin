@@ -9,20 +9,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Component
 public class BookConverter {
-    private final AuthorConverter authorConverter;
-
-    private final GenreConverter genreConverter;
 
     public String bookToString(Book book) {
-        var genresString = book.getGenres().stream()
-                .map(genreConverter::genreToString)
-                .map("{%s}"::formatted)
-                .collect(Collectors.joining(", "));
+        System.out.println(book.getAuthorId());
+        String genresString = "";
+        if (book.getGenreIds() != null && !book.getGenreIds().isEmpty()) {
+            genresString = book.getGenreIds().stream()
+                    .map("{%s}"::formatted)
+                    .collect(Collectors.joining(", "));
+        }
 
-        return "Id: %s, title: %s, author: {%s}, genres: [%s]".formatted(
+        String authorPart = (book.getAuthorId() != null)
+                ? "{" + book.getAuthorId() + "}"
+                : "{null}";
+
+        return "Id: %s, title: %s, author: %s, genres: [%s]".formatted(
                 book.getId(),
                 book.getTitle(),
-                authorConverter.authorToString(book.getAuthor()),
+                authorPart,
                 genresString);
     }
 }
