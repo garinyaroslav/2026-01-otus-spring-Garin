@@ -8,7 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DocumentReference;
+
 import java.util.List;
 
 @Document(collection = "books")
@@ -28,10 +28,8 @@ public class Book {
     @ToString.Include
     private String title;
 
-    @DocumentReference
-    private Author author;
+    private String authorId;
 
-    @DocumentReference
-    private List<Genre> genres;
+    private List<String> genreIds;
 
 }

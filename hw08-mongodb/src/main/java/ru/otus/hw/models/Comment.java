@@ -20,6 +20,6 @@ public class Comment {
 
     private String text;
 
-    @DocumentReference
+    @DocumentReference(lazy = true)
     private Book book;
 }
