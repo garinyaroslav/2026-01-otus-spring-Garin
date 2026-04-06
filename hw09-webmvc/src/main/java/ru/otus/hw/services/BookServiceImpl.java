@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ru.otus.hw.dto.BookCreateDto;
+import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.AuthorRepository;
@@ -42,7 +44,10 @@ public class BookServiceImpl implements BookService {
 
     @Transactional
     @Override
-    public Book insert(String title, long authorId, Set<Long> genresIds) {
+    public Book insert(BookCreateDto dto) {
+        Long authorId = dto.getAuthorId();
+        Set<Long> genresIds = dto.getGenreIds();
+
         if (isEmpty(genresIds)) {
             throw new IllegalArgumentException("Genres ids must not be null");
         }
@@ -56,12 +61,16 @@ public class BookServiceImpl implements BookService {
             throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
         }
 
-        return bookRepository.save(new Book(0L, title, author, genres, List.of()));
+        return bookRepository.save(new Book(0L, dto.getTitle(), author, genres, List.of()));
     }
 
     @Transactional
     @Override
-    public Book update(long id, String title, long authorId, Set<Long> genresIds) {
+    public Book update(BookUpdateDto dto) {
+        Long id = dto.getId();
+        Set<Long> genresIds = dto.getGenreIds();
+        Long authorId = dto.getAuthorId();
+
         var book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
 
@@ -73,7 +82,7 @@ public class BookServiceImpl implements BookService {
             throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
         }
 
-        book.setTitle(title);
+        book.setTitle(dto.getTitle());
         book.setAuthor(author);
         book.setGenres(genres);
 

@@ -1,21 +1,26 @@
 package ru.otus.hw.controllers;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.otus.hw.dto.BookDto;
+
+import jakarta.validation.Valid;
+import ru.otus.hw.dto.BookCreateDto;
+import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.GenreService;
-
-import java.util.HashSet;
 
 @Controller
 @RequestMapping("/books")
@@ -45,16 +50,22 @@ public class BookController {
 
     @GetMapping("/create")
     public String createBookForm(Model model) {
-        model.addAttribute("book", new BookDto());
+        model.addAttribute("bookCreateDto", new BookCreateDto());
         model.addAttribute("authors", authorService.findAll());
         model.addAttribute("genres", genreService.findAll());
-        return "books/form";
+        return "books/form-create";
     }
 
     @PostMapping("/create")
-    public String createBook(@ModelAttribute("book") BookDto dto) {
-        bookService.insert(dto.getTitle(), dto.getAuthorId(), new HashSet<>(dto.getGenreIds()));
+    public String createBook(@Valid @ModelAttribute("bookCreateDto") BookCreateDto dto,
+            BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("authors", authorService.findAll());
+            model.addAttribute("genres", genreService.findAll());
+            return "books/form-create";
+        }
 
+        bookService.insert(dto);
         return "redirect:/books";
     }
 
@@ -63,22 +74,29 @@ public class BookController {
         var book = bookService.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
 
-        var dto = new BookDto(
+        var dto = new BookUpdateDto(
                 book.getId(),
                 book.getTitle(),
                 book.getAuthor().getId(),
-                book.getGenres().stream().map(g -> g.getId()).toList());
+                book.getGenres().stream().map(g -> g.getId()).collect(Collectors.toSet()));
 
-        model.addAttribute("book", dto);
+        model.addAttribute("bookUpdateDto", dto);
         model.addAttribute("authors", authorService.findAll());
         model.addAttribute("genres", genreService.findAll());
-        return "books/form";
+        return "books/form-edit";
     }
 
     @PostMapping("/{id}/edit")
-    public String editBook(@PathVariable long id, @ModelAttribute("book") BookDto dto) {
-        bookService.update(id, dto.getTitle(), dto.getAuthorId(), new HashSet<>(dto.getGenreIds()));
+    public String editBook(@PathVariable long id,
+            @Valid @ModelAttribute("bookUpdateDto") BookUpdateDto dto,
+            BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("authors", authorService.findAll());
+            model.addAttribute("genres", genreService.findAll());
+            return "books/form-edit";
+        }
 
+        bookService.update(dto);
         return "redirect:/books";
     }
 

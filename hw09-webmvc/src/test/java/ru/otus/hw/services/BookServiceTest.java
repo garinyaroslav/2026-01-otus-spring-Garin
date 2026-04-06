@@ -7,6 +7,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import ru.otus.hw.dto.BookCreateDto;
+import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -46,9 +49,9 @@ class BookServiceTest {
     }
 
     private void recreateTestBooks() {
-        bookService.insert("Book A", 1L, Set.of(1L));
-        bookService.insert("Book B", 2L, Set.of(2L));
-        bookService.insert("Book C", 1L, Set.of(3L));
+        bookService.insert(new BookCreateDto("Book A", 1L, Set.of(1L)));
+        bookService.insert(new BookCreateDto("Book B", 2L, Set.of(2L)));
+        bookService.insert(new BookCreateDto("Book C", 1L, Set.of(3L)));
     }
 
     @DisplayName("findAll должен возвращать книги с инициализированными жанрами и автором")
@@ -88,7 +91,7 @@ class BookServiceTest {
     @DisplayName("insert должен сохранять книгу и возвращать её с корректными связями")
     @Test
     void insert_shouldPersistAndReturnBookWithRelations() {
-        Book actual = bookService.insert("New Book", 1L, Set.of(1L, 2L));
+        Book actual = bookService.insert(new BookCreateDto("New Book", 1L, Set.of(1L, 2L)));
 
         Book expected = new Book(0L, "New Book", dbAuthors.get(0),
                 List.of(dbGenres.get(0), dbGenres.get(1)), List.of());
@@ -105,9 +108,9 @@ class BookServiceTest {
     @DisplayName("update должен обновлять книгу и возвращать актуальные данные")
     @Test
     void update_shouldUpdateAndReturnBook() {
-        Book toUpdate = bookService.insert("Original Title", 1L, Set.of(1L));
+        Book toUpdate = bookService.insert(new BookCreateDto("Original Title", 1L, Set.of(1L)));
 
-        Book actual = bookService.update(toUpdate.getId(), "Updated Title", 2L, Set.of(2L, 3L));
+        Book actual = bookService.update(new BookUpdateDto(toUpdate.getId(), "Updated Title", 2L, Set.of(2L, 3L)));
 
         Book expected = new Book(toUpdate.getId(), "Updated Title",
                 dbAuthors.get(1), List.of(dbGenres.get(1), dbGenres.get(2)), List.of());
@@ -124,7 +127,7 @@ class BookServiceTest {
     @DisplayName("deleteById должен удалять книгу и все связанные с ней комментарии")
     @Test
     void deleteById_shouldDeleteBook() {
-        Book bookToDelete = bookService.insert("Book To Delete", 1L, Set.of(1L));
+        Book bookToDelete = bookService.insert(new BookCreateDto("Book To Delete", 1L, Set.of(1L)));
         long bookId = bookToDelete.getId();
 
         commentService.insert(bookId, "Comment 1");
