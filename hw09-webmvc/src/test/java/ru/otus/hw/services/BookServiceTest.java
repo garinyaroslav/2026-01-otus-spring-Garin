@@ -9,13 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import ru.otus.hw.dto.BookCreateDto;
+import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.BookUpdateDto;
-import ru.otus.hw.models.Author;
-import ru.otus.hw.models.Book;
-import ru.otus.hw.models.Genre;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -31,104 +28,78 @@ class BookServiceTest {
     @Autowired
     private CommentService commentService;
 
-    private List<Author> dbAuthors;
-    private List<Genre> dbGenres;
-
     @BeforeEach
     void setUp() {
-        deleteAllBooksAndRelations();
-
-        dbAuthors = getDbAuthors();
-        dbGenres = getDbGenres();
-
-        recreateTestBooks();
-    }
-
-    private void deleteAllBooksAndRelations() {
         bookService.findAll().forEach(book -> bookService.deleteById(book.getId()));
-    }
 
-    private void recreateTestBooks() {
         bookService.insert(new BookCreateDto("Book A", 1L, Set.of(1L)));
         bookService.insert(new BookCreateDto("Book B", 2L, Set.of(2L)));
         bookService.insert(new BookCreateDto("Book C", 1L, Set.of(3L)));
     }
 
-    @DisplayName("findAll должен возвращать книги с инициализированными жанрами и автором")
+    @DisplayName("findAll должен возвращать BookDto с инициализированными автором и жанрами")
     @Test
-    void findAll_shouldReturnBooksWithInitializedRelations() {
-        List<Book> books = bookService.findAll();
+    void findAll_shouldReturnDtosWithRelations() {
+        List<BookDto> books = bookService.findAll();
 
         assertThat(books).isNotEmpty();
-        assertThat(books).allSatisfy(book -> {
-            assertThat(book.getAuthor()).isNotNull();
-            assertThat(book.getAuthor().getFullName()).isNotBlank();
-            assertThat(book.getGenres()).isNotNull().isNotEmpty();
+        assertThat(books).allSatisfy(dto -> {
+            assertThat(dto.getAuthor()).isNotNull();
+            assertThat(dto.getAuthor().getFullName()).isNotBlank();
+            assertThat(dto.getGenres()).isNotNull().isNotEmpty();
         });
     }
 
-    @DisplayName("findById должен возвращать книгу с инициализированными связями")
+    @DisplayName("findById должен возвращать корректный BookDto")
     @ParameterizedTest
-    @MethodSource("getDbBooks")
-    void shouldReturnCorrectBookById(Book expectedBook) {
-        Optional<Book> result = bookService.findAll().stream()
-                .filter(b -> b.getTitle().equals(expectedBook.getTitle()))
+    @MethodSource("expectedBookTitles")
+    void findById_shouldReturnCorrectDto(String expectedTitle) {
+        var result = bookService.findAll().stream()
+                .filter(dto -> dto.getTitle().equals(expectedTitle))
                 .findFirst();
 
         assertThat(result)
-                .as("Книга '%s' должна существовать", expectedBook.getTitle())
-                .isPresent()
-                .get()
-                .usingRecursiveComparison()
-                .ignoringFields("id", "genres", "author.fullName", "author.books", "comments")
-                .isEqualTo(expectedBook);
+                .as("Книга '%s' должна существовать", expectedTitle)
+                .isPresent();
 
-        Book actual = result.get();
-        assertThat(actual.getAuthor().getFullName()).isNotBlank();
-        assertThat(actual.getGenres()).isNotEmpty();
+        BookDto dto = result.get();
+        assertThat(dto.getAuthor()).isNotNull();
+        assertThat(dto.getGenres()).isNotEmpty();
     }
 
-    @DisplayName("insert должен сохранять книгу и возвращать её с корректными связями")
+    @DisplayName("insert должен сохранять книгу и возвращать BookDto с корректными связями")
     @Test
-    void insert_shouldPersistAndReturnBookWithRelations() {
-        Book actual = bookService.insert(new BookCreateDto("New Book", 1L, Set.of(1L, 2L)));
+    void insert_shouldPersistAndReturnDto() {
+        BookDto actual = bookService.insert(new BookCreateDto("New Book", 1L, Set.of(1L, 2L)));
 
-        Book expected = new Book(0L, "New Book", dbAuthors.get(0),
-                List.of(dbGenres.get(0), dbGenres.get(1)), List.of());
-
-        assertThat(actual)
-                .usingRecursiveComparison()
-                .ignoringFields("id", "author.fullName", "author.books", "genres", "comments")
-                .isEqualTo(expected);
         assertThat(actual.getId()).isGreaterThan(0);
-        assertThat(actual.getGenres()).hasSize(2);
-        assertThat(actual.getAuthor().getFullName()).isNotBlank();
-    }
-
-    @DisplayName("update должен обновлять книгу и возвращать актуальные данные")
-    @Test
-    void update_shouldUpdateAndReturnBook() {
-        Book toUpdate = bookService.insert(new BookCreateDto("Original Title", 1L, Set.of(1L)));
-
-        Book actual = bookService.update(new BookUpdateDto(toUpdate.getId(), "Updated Title", 2L, Set.of(2L, 3L)));
-
-        Book expected = new Book(toUpdate.getId(), "Updated Title",
-                dbAuthors.get(1), List.of(dbGenres.get(1), dbGenres.get(2)), List.of());
-
-        assertThat(actual)
-                .usingRecursiveComparison()
-                .ignoringFields("author.fullName", "author.books", "genres", "comments")
-                .isEqualTo(expected);
+        assertThat(actual.getTitle()).isEqualTo("New Book");
         assertThat(actual.getAuthor()).isNotNull();
-        assertThat(actual.getGenres()).hasSize(2);
         assertThat(actual.getAuthor().getFullName()).isNotBlank();
+        assertThat(actual.getGenres()).hasSize(2);
     }
 
-    @DisplayName("deleteById должен удалять книгу и все связанные с ней комментарии")
+    @DisplayName("update должен обновлять книгу и возвращать актуальный BookDto")
     @Test
-    void deleteById_shouldDeleteBook() {
-        Book bookToDelete = bookService.insert(new BookCreateDto("Book To Delete", 1L, Set.of(1L)));
-        long bookId = bookToDelete.getId();
+    void update_shouldUpdateAndReturnDto() {
+        BookDto toUpdate = bookService.insert(new BookCreateDto("Original Title", 1L, Set.of(1L)));
+
+        BookDto actual = bookService.update(
+                new BookUpdateDto(toUpdate.getId(), "Updated Title", 2L, Set.of(2L, 3L)));
+
+        assertThat(actual.getId()).isEqualTo(toUpdate.getId());
+        assertThat(actual.getTitle()).isEqualTo("Updated Title");
+        assertThat(actual.getAuthor()).isNotNull();
+        assertThat(actual.getAuthor().getId()).isEqualTo(2L);
+        assertThat(actual.getAuthor().getFullName()).isNotBlank();
+        assertThat(actual.getGenres()).hasSize(2);
+    }
+
+    @DisplayName("deleteById должен удалять книгу и все связанные комментарии")
+    @Test
+    void deleteById_shouldDeleteBookAndComments() {
+        BookDto bookDto = bookService.insert(new BookCreateDto("Book To Delete", 1L, Set.of(1L)));
+        long bookId = bookDto.getId();
 
         commentService.insert(bookId, "Comment 1");
         commentService.insert(bookId, "Comment 2");
@@ -142,27 +113,7 @@ class BookServiceTest {
         assertThat(commentService.findAllByBookId(bookId)).isEmpty();
     }
 
-    private static List<Author> getDbAuthors() {
-        return List.of(
-                new Author(1L, "Author A", null),
-                new Author(2L, "Author B", null));
-    }
-
-    private static List<Genre> getDbGenres() {
-        return List.of(
-                new Genre(1L, "Genre1"),
-                new Genre(2L, "Genre2"),
-                new Genre(3L, "Genre3"));
-    }
-
-    private static List<Book> getDbBooks(List<Author> authors, List<Genre> genres) {
-        return List.of(
-                new Book(0L, "Book A", authors.get(0), List.of(genres.get(0)), List.of()),
-                new Book(0L, "Book B", authors.get(1), List.of(genres.get(1)), List.of()),
-                new Book(0L, "Book C", authors.get(0), List.of(genres.get(2)), List.of()));
-    }
-
-    private static Stream<Book> getDbBooks() {
-        return getDbBooks(getDbAuthors(), getDbGenres()).stream();
+    private static Stream<String> expectedBookTitles() {
+        return Stream.of("Book A", "Book B", "Book C");
     }
 }

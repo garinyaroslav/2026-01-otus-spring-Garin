@@ -4,9 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
-import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.BookRepository;
 
@@ -27,41 +28,37 @@ class CommentServiceTest {
     private Book createTestBook() {
         Author author = new Author(1L, "Author A", null);
         Genre genre = new Genre(1L, "Genre1");
-
-        Book book = new Book(0L, "Test Book for Comments", author, List.of(genre), List.of());
-        return bookRepository.save(book);
+        return bookRepository.save(new Book(0L, "Test Book for Comments", author, List.of(genre), List.of()));
     }
 
-    @DisplayName("findById должен возвращать комментарий с доступной книгой")
+    @DisplayName("findById должен возвращать CommentDto с корректным bookId")
     @Test
-    void findById_shouldReturnCommentWithAccessibleBook() {
+    void findById_shouldReturnCommentDtoWithBookId() {
         Book book = createTestBook();
+        CommentDto inserted = commentService.insert(book.getId(), "Test comment");
 
-        Comment inserted = commentService.insert(book.getId(), "Test comment");
         var found = commentService.findById(inserted.getId());
 
         assertThat(found).isPresent();
         assertThat(found.get().getText()).isEqualTo("Test comment");
-        assertThat(found.get().getBook()).isNotNull();
-        assertThat(found.get().getBook().getId()).isEqualTo(book.getId());
+        assertThat(found.get().getBookId()).isEqualTo(book.getId());
 
         commentService.deleteById(inserted.getId());
         bookRepository.deleteById(book.getId());
     }
 
-    @DisplayName("findAllByBookId должен возвращать все комментарии книги")
+    @DisplayName("findAllByBookId должен возвращать все CommentDto для книги")
     @Test
-    void findAllByBookId_shouldReturnComments() {
+    void findAllByBookId_shouldReturnCommentDtos() {
         Book book = createTestBook();
+        CommentDto c1 = commentService.insert(book.getId(), "Comment Alpha");
+        CommentDto c2 = commentService.insert(book.getId(), "Comment Beta");
 
-        var c1 = commentService.insert(book.getId(), "Comment Alpha");
-        var c2 = commentService.insert(book.getId(), "Comment Beta");
-
-        List<Comment> comments = commentService.findAllByBookId(book.getId());
+        List<CommentDto> comments = commentService.findAllByBookId(book.getId());
 
         assertThat(comments)
                 .hasSize(2)
-                .extracting(Comment::getText)
+                .extracting(CommentDto::getText)
                 .containsExactlyInAnyOrder("Comment Alpha", "Comment Beta");
 
         commentService.deleteById(c1.getId());
@@ -69,31 +66,31 @@ class CommentServiceTest {
         bookRepository.deleteById(book.getId());
     }
 
-    @DisplayName("insert должен сохранять комментарий")
+    @DisplayName("insert должен сохранять комментарий и возвращать CommentDto")
     @Test
-    void insert_shouldPersistComment() {
+    void insert_shouldPersistAndReturnCommentDto() {
         Book book = createTestBook();
 
-        var saved = commentService.insert(book.getId(), "New comment");
+        CommentDto saved = commentService.insert(book.getId(), "New comment");
 
         assertThat(saved.getId()).isGreaterThan(0);
         assertThat(saved.getText()).isEqualTo("New comment");
-        assertThat(saved.getBook().getId()).isEqualTo(book.getId());
+        assertThat(saved.getBookId()).isEqualTo(book.getId());
 
         commentService.deleteById(saved.getId());
         bookRepository.deleteById(book.getId());
     }
 
-    @DisplayName("update должен обновлять текст комментария")
+    @DisplayName("update должен обновлять текст комментария и возвращать CommentDto")
     @Test
-    void update_shouldUpdateCommentText() {
+    void update_shouldUpdateCommentTextAndReturnDto() {
         Book book = createTestBook();
+        CommentDto saved = commentService.insert(book.getId(), "Old text");
 
-        var saved = commentService.insert(book.getId(), "Old text");
-        var updated = commentService.update(saved.getId(), "New text");
+        CommentDto updated = commentService.update(saved.getId(), "New text");
 
         assertThat(updated.getText()).isEqualTo("New text");
-        assertThat(updated.getBook().getId()).isEqualTo(book.getId());
+        assertThat(updated.getBookId()).isEqualTo(book.getId());
 
         commentService.deleteById(saved.getId());
         bookRepository.deleteById(book.getId());
@@ -103,12 +100,11 @@ class CommentServiceTest {
     @Test
     void deleteById_shouldDeleteComment() {
         Book book = createTestBook();
+        CommentDto saved = commentService.insert(book.getId(), "To be deleted");
 
-        var saved = commentService.insert(book.getId(), "To be deleted");
         commentService.deleteById(saved.getId());
 
         assertThat(commentService.findById(saved.getId())).isEmpty();
-
         bookRepository.deleteById(book.getId());
     }
 }
