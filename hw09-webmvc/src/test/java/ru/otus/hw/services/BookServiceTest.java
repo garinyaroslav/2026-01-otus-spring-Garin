@@ -11,12 +11,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.otus.hw.dto.BookCreateDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.BookUpdateDto;
+import ru.otus.hw.exceptions.EntityNotFoundException;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Тест сервиса книг")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -104,12 +107,12 @@ class BookServiceTest {
         commentService.insert(bookId, "Comment 1");
         commentService.insert(bookId, "Comment 2");
 
-        assertThat(bookService.findById(bookId)).isPresent();
+        assertNotNull(bookService.findById(bookId));
         assertThat(commentService.findAllByBookId(bookId)).hasSize(2);
 
         bookService.deleteById(bookId);
 
-        assertThat(bookService.findById(bookId)).isEmpty();
+        assertThrows(EntityNotFoundException.class, () -> bookService.findById(bookId));
         assertThat(commentService.findAllByBookId(bookId)).isEmpty();
     }
 

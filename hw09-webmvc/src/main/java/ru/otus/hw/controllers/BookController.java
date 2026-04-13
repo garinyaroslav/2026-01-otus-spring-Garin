@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import jakarta.validation.Valid;
 import ru.otus.hw.dto.BookCreateDto;
 import ru.otus.hw.dto.BookUpdateDto;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.GenreService;
@@ -41,10 +40,8 @@ public class BookController {
 
     @GetMapping("/{id}")
     public String viewBook(@PathVariable long id, Model model) {
-        var book = bookService.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
+        model.addAttribute("book", bookService.findById(id));
 
-        model.addAttribute("book", book);
         return "books/view";
     }
 
@@ -71,8 +68,7 @@ public class BookController {
 
     @GetMapping("/{id}/edit")
     public String editBookForm(@PathVariable long id, Model model) {
-        var book = bookService.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
+        var book = bookService.findById(id);
 
         var dto = new BookUpdateDto(
                 book.getId(),
@@ -102,10 +98,8 @@ public class BookController {
 
     @GetMapping("/{id}/delete")
     public String deleteBookForm(@PathVariable long id, Model model) {
-        var book = bookService.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
+        model.addAttribute("book", bookService.findById(id));
 
-        model.addAttribute("book", book);
         return "books/delete";
     }
 

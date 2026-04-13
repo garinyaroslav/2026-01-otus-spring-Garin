@@ -3,7 +3,6 @@ package ru.otus.hw.services;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -31,8 +30,9 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
 
     @Override
-    public Optional<BookDto> findById(long id) {
-        return bookRepository.findById(id).map(BookDto::of);
+    public BookDto findById(long id) {
+        return bookRepository.findById(id).map(BookDto::of)
+                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
     }
 
     @Override

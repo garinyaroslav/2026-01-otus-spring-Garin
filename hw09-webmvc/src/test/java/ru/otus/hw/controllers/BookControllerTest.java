@@ -13,7 +13,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -82,7 +81,7 @@ class BookControllerTest {
     @DisplayName("GET /books/{id}")
     @Test
     void viewBook_shouldReturnViewPage() throws Exception {
-        given(bookService.findById(1L)).willReturn(Optional.of(bookDto()));
+        given(bookService.findById(1L)).willReturn(bookDto());
 
         mvc.perform(get("/books/1"))
                 .andExpect(status().isOk())
@@ -162,7 +161,7 @@ class BookControllerTest {
     @DisplayName("GET /books/{id}/edit")
     @Test
     void editBookForm_shouldReturnFormWithBook() throws Exception {
-        given(bookService.findById(1L)).willReturn(Optional.of(bookDto()));
+        given(bookService.findById(1L)).willReturn(bookDto());
         given(authorService.findAll()).willReturn(authorDtos());
         given(genreService.findAll()).willReturn(genreDtos());
 
@@ -219,7 +218,7 @@ class BookControllerTest {
     @DisplayName("GET /books/{id}/delete")
     @Test
     void deleteBookForm_shouldReturnConfirmPage() throws Exception {
-        given(bookService.findById(1L)).willReturn(Optional.of(bookDto()));
+        given(bookService.findById(1L)).willReturn(bookDto());
 
         mvc.perform(get("/books/1/delete"))
                 .andExpect(status().isOk())
