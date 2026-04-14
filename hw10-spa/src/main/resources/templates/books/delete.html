@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Delete Book — Library</title>
+</head>
+<body>
+<main>
+    <div class="page-header">
+        <h1>Delete Book</h1>
+        <a th:href="@{/books}" class="btn btn-secondary">← All Books</a>
+    </div>
+
+    <div class="confirm-box">
+        <p>
+            Are you sure you want to delete
+            <strong th:text="${book.title}"></strong>?
+            <br/>This will also remove all associated comments.
+        </p>
+        <div class="btn-group" style="justify-content: center;">
+            <form th:action="@{/books/{id}/delete(id=${book.id})}" method="delete">
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            </form>
+            <a th:href="@{/books}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>
