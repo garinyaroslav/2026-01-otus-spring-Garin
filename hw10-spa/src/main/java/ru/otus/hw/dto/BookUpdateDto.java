@@ -6,7 +6,6 @@ import java.util.Set;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +17,6 @@ import lombok.NoArgsConstructor;
 public class BookUpdateDto {
 
     @NotNull(message = "id is required")
-    @Positive(message = "Id must be positive")
     private Long id;
 
     @NotBlank(message = "Title is required")
@@ -26,7 +24,6 @@ public class BookUpdateDto {
     private String title;
 
     @NotNull(message = "Author is required")
-    @Positive(message = "Invalid author selection")
     private Long authorId;
 
     @NotEmpty(message = "At least one genre must be selected")

@@ -3,6 +3,7 @@ package ru.otus.hw.controllers;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -144,6 +145,31 @@ class BookControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(bookService).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("PUT /api/books/{id}")
+    void updateBook_shouldReturn404WhenNotFound() throws Exception {
+        BookUpdateDto updateDto = new BookUpdateDto(99L, "Updated Title", 2L, Set.of(3L));
+
+        given(bookService.update(any(BookUpdateDto.class)))
+                .willThrow(new EntityNotFoundException("Book with id 99 not found"));
+
+        mvc.perform(put("/api/books/99")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/books/{id}")
+    void deleteBook_shouldReturn404WhenNotFound() throws Exception {
+        willThrow(new EntityNotFoundException("Book with id 99 not found"))
+                .given(bookService)
+                .deleteById(99L);
+
+        mvc.perform(delete("/api/books/99"))
+                .andExpect(status().isNotFound());
     }
 
 }

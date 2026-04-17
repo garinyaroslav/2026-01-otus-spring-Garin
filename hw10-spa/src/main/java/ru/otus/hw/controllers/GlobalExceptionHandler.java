@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import ru.otus.hw.dto.ErrorDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 
 @RestControllerAdvice
@@ -20,17 +21,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handleValidation(MethodArgumentNotValidException ex) {
+    public ErrorDto handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             fieldErrors.put(error.getField(), error.getDefaultMessage());
         }
-        return Map.of("status", 400, "errors", fieldErrors);
+        return new ErrorDto(ex.getMessage(), fieldErrors);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handleConstraintViolation(ConstraintViolationException ex) {
+    public ErrorDto handleConstraintViolation(ConstraintViolationException ex) {
         Map<String, String> fieldErrors = new HashMap<>();
 
         ex.getConstraintViolations().forEach(violation -> {
@@ -41,19 +42,19 @@ public class GlobalExceptionHandler {
             fieldErrors.put(fieldName, violation.getMessage());
         });
 
-        return Map.of("status", 400, "errors", fieldErrors);
+        return new ErrorDto(ex.getMessage(), fieldErrors);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, Object> handleNotFound(EntityNotFoundException ex) {
-        return Map.of("status", 404, "message", ex.getMessage());
+    public ErrorDto handleNotFound(EntityNotFoundException ex) {
+        return new ErrorDto(ex.getMessage(), null);
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, Object> handleGeneral(Exception ex) {
+    public ErrorDto handleGeneral(Exception ex) {
         log.error("Unexpected error: {}", ex.getMessage(), ex);
-        return Map.of("status", 500, "message", "Internal server error");
+        return new ErrorDto(ex.getMessage(), null);
     }
 }
