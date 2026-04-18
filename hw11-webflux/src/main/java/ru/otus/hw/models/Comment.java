@@ -15,17 +15,17 @@ import lombok.NoArgsConstructor;
 public class Comment {
 
     @Id
-    private long id;
+    private Long id;
 
     private String text;
 
     @Column("book_id")
-    private long bookId;
+    private Long bookId;
 
     @Transient
     private Book book;
 
-    public Comment(long id, String text, long bookId) {
+    public Comment(Long id, String text, Long bookId) {
         this.id = id;
         this.text = text;
         this.bookId = bookId;

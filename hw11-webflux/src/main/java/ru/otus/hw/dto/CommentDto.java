@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import reactor.core.publisher.Flux;
 import ru.otus.hw.models.Comment;
 
 @Data
@@ -41,6 +42,14 @@ public class CommentDto {
         return comments.stream()
                 .map(CommentDto::of)
                 .toList();
+    }
+
+    public static Flux<CommentDto> fromList(Flux<Comment> comments) {
+        if (comments == null) {
+            return Flux.empty();
+        }
+
+        return comments.map(CommentDto::of);
     }
 
 }

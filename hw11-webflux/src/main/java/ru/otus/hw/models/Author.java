@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class Author {
 
     @Id
-    private long id;
+    private Long id;
 
     @Column("full_name")
     private String fullName;

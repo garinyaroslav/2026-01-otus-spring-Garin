@@ -47,7 +47,7 @@ public class BookServiceImpl implements BookService {
     public Mono<BookDto> insert(BookCreateDto dto) {
         return validateAndFetchRelations(dto.getAuthorId(), dto.getGenreIds())
                 .flatMap(relations -> {
-                    var book = new Book(0, dto.getTitle(), relations.authorId());
+                    var book = new Book(null, dto.getTitle(), relations.authorId());
                     return bookRepository.save(book)
                             .flatMap(saved -> saveGenreLinks(saved.getId(), relations.genreIds())
                                     .thenReturn(saved))

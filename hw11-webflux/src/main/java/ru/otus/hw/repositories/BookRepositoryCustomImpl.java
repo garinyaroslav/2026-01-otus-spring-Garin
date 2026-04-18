@@ -27,37 +27,32 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     public Flux<Book> findAllWithRelations() {
         return ops.select(Query.empty(), Book.class)
                 .collectList()
-                .flatMapMany(books -> {
-                    if (books.isEmpty()) {
-                        return Flux.empty();
-                    }
+                .flatMapMany(this::enrichBooksWithRelations);
+    }
 
-                    Set<Long> authorIds = books.stream()
-                            .map(Book::getAuthorId)
-                            .collect(Collectors.toSet());
+    private Flux<Book> enrichBooksWithRelations(List<Book> books) {
+        if (books.isEmpty()) {
+            return Flux.empty();
+        }
+        Set<Long> authorIds = books.stream().map(Book::getAuthorId).collect(Collectors.toSet());
+        Set<Long> bookIds = books.stream().map(Book::getId).collect(Collectors.toSet());
 
-                    Set<Long> bookIds = books.stream()
-                            .map(Book::getId)
-                            .collect(Collectors.toSet());
+        Mono<Map<Long, Author>> authorMapMono = ops
+                .select(Query.query(Criteria.where("id").in(authorIds)), Author.class)
+                .collectMap(Author::getId);
+        Mono<Map<Long, List<Genre>>> genreMapMono = fetchGenresForBooks(bookIds);
 
-                    Mono<Map<Long, Author>> authorMapMono = ops
-                            .select(Query.query(Criteria.where("id").in(authorIds)), Author.class)
-                            .collectMap(Author::getId);
+        return Mono.zip(authorMapMono, genreMapMono)
+                .flatMapMany(tuple -> {
+                    Map<Long, Author> authorMap = tuple.getT1();
+                    Map<Long, List<Genre>> genreMap = tuple.getT2();
 
-                    Mono<Map<Long, List<Genre>>> genreMapMono = fetchGenresForBooks(bookIds);
-
-                    return Mono.zip(authorMapMono, genreMapMono)
-                            .flatMapMany(tuple -> {
-                                Map<Long, Author> authorMap = tuple.getT1();
-                                Map<Long, List<Genre>> genreMap = tuple.getT2();
-
-                                return Flux.fromIterable(books).map(book -> {
-                                    book.setAuthor(authorMap.get(book.getAuthorId()));
-                                    book.setGenres(genreMap.getOrDefault(book.getId(), List.of()));
-                                    book.setComments(List.of());
-                                    return book;
-                                });
-                            });
+                    return Flux.fromIterable(books).map(book -> {
+                        book.setAuthor(authorMap.get(book.getAuthorId()));
+                        book.setGenres(genreMap.getOrDefault(book.getId(), List.of()));
+                        book.setComments(List.of());
+                        return book;
+                    });
                 });
     }
 
@@ -65,18 +60,13 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     public Mono<Book> findByIdWithRelations(long id) {
         return ops.selectOne(Query.query(Criteria.where("id").is(id)), Book.class)
                 .flatMap(book -> {
-                    Mono<Author> authorMono = ops
-                            .selectOne(Query.query(Criteria.where("id").is(book.getAuthorId())),
-                                    Author.class);
-
+                    Mono<Author> authorMono = ops.selectOne(
+                            Query.query(Criteria.where("id").is(book.getAuthorId())), Author.class);
                     Mono<List<Genre>> genresMono = fetchGenresForBooks(Set.of(book.getId()))
                             .map(m -> m.getOrDefault(book.getId(), List.of()));
-
                     Mono<List<Comment>> commentsMono = ops
-                            .select(Query.query(Criteria.where("book_id").is(book.getId())),
-                                    Comment.class)
+                            .select(Query.query(Criteria.where("book_id").is(book.getId())), Comment.class)
                             .collectList();
-
                     return Mono.zip(authorMono, genresMono, commentsMono)
                             .map(tuple -> {
                                 book.setAuthor(tuple.getT1());
@@ -88,37 +78,40 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     }
 
     private Mono<Map<Long, List<Genre>>> fetchGenresForBooks(Set<Long> bookIds) {
+        return fetchBookGenreAssociations(bookIds)
+                .flatMap(this::enrichWithGenreDetails);
+    }
+
+    private Mono<Map<Long, List<Long>>> fetchBookGenreAssociations(Set<Long> bookIds) {
         return ops.getDatabaseClient()
                 .sql("SELECT bg.book_id, bg.genre_id FROM books_genres bg WHERE bg.book_id IN (:ids)")
                 .bind("ids", bookIds)
                 .fetch()
                 .all()
                 .collectList()
-                .flatMap(rows -> {
-                    if (rows.isEmpty()) {
-                        return Mono.just(Map.of());
-                    }
+                .map(rows -> rows.stream()
+                        .collect(Collectors.groupingBy(
+                                r -> ((Number) r.get("book_id")).longValue(),
+                                Collectors.mapping(
+                                        r -> ((Number) r.get("genre_id")).longValue(),
+                                        Collectors.toList()))));
+    }
 
-                    Map<Long, List<Long>> bookToGenreIds = rows.stream()
-                            .collect(Collectors.groupingBy(
-                                    r -> ((Number) r.get("book_id")).longValue(),
-                                    Collectors.mapping(
-                                            r -> ((Number) r.get("genre_id")).longValue(),
-                                            Collectors.toList())));
+    private Mono<Map<Long, List<Genre>>> enrichWithGenreDetails(Map<Long, List<Long>> bookToGenreIds) {
+        if (bookToGenreIds.isEmpty()) {
+            return Mono.just(Map.of());
+        }
+        Set<Long> allGenreIds = bookToGenreIds.values().stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
 
-                    Set<Long> allGenreIds = rows.stream()
-                            .map(r -> ((Number) r.get("genre_id")).longValue())
-                            .collect(Collectors.toSet());
-
-                    return ops.select(
-                            Query.query(Criteria.where("id").in(allGenreIds)), Genre.class)
-                            .collectMap(Genre::getId)
-                            .map(genreById -> bookToGenreIds.entrySet().stream()
-                                    .collect(Collectors.toMap(
-                                            Map.Entry::getKey,
-                                            e -> e.getValue().stream()
-                                                    .map(genreById::get)
-                                                    .collect(Collectors.toList()))));
-                });
+        return ops.select(Query.query(Criteria.where("id").in(allGenreIds)), Genre.class)
+                .collectMap(Genre::getId)
+                .map(genreById -> bookToGenreIds.entrySet().stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                e -> e.getValue().stream()
+                                        .map(genreById::get)
+                                        .collect(Collectors.toList()))));
     }
 }

@@ -1,20 +1,20 @@
-insert into authors(full_name)
-values ('Author_1'), ('Author_2'), ('Author_3');
+INSERT INTO authors(id, full_name)
+VALUES (1, 'Author A'), (2, 'Author B'), (3, 'Author C');
 
-insert into genres(name)
-values ('Genre_1'), ('Genre_2'), ('Genre_3'),
-       ('Genre_4'), ('Genre_5'), ('Genre_6');
+INSERT INTO genres(id, name)
+VALUES (1, 'Genre1'), (2, 'Genre2'), (3, 'Genre3'),
+       (4, 'Genre4'), (5, 'Genre5'), (6, 'Genre6');
 
-insert into books(title, author_id)
-values ('BookTitle_1', 1), ('BookTitle_2', 2), ('BookTitle_3', 3);
+INSERT INTO books(id, title, author_id)
+VALUES (1, 'Book A', 1), (2, 'Book B', 2), (3, 'Book C', 1);
 
-insert into books_genres(book_id, genre_id)
-values (1, 1), (1, 2),
+INSERT INTO books_genres(book_id, genre_id)
+VALUES (1, 1), (1, 2),
        (2, 3), (2, 4),
        (3, 5), (3, 6);
 
-insert into comments(text, book_id)
-values ('Comment_1_for_book_1', 1),
-       ('Comment_2_for_book_1', 1),
-       ('Comment_1_for_book_2', 2),
-       ('Comment_1_for_book_3', 3);
+INSERT INTO comments(id, text, book_id)
+VALUES (1, 'Comment 1', 1),
+       (2, 'Comment 2', 1),
+       (3, 'Comment 1', 2),
+       (4, 'Comment 1', 3);

@@ -1,18 +1,20 @@
 package ru.otus.hw.repositories;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Set;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import ru.otus.hw.models.Genre;
+import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
+import org.springframework.test.annotation.DirtiesContext;
 
-import java.util.List;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import reactor.test.StepVerifier;
 
 @DisplayName("Репозиторий жанров")
-@DataJpaTest
+@DataR2dbcTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class GenreRepositoryTest {
 
     @Autowired
@@ -21,26 +23,23 @@ class GenreRepositoryTest {
     @DisplayName("должен загружать все жанры")
     @Test
     void shouldFindAll() {
-        var genres = genreRepository.findAll();
-
-        assertThat(genres)
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(
-                        new Genre(1L, "Genre1"),
-                        new Genre(2L, "Genre2"),
-                        new Genre(3L, "Genre3")));
+        StepVerifier.create(genreRepository.findAll())
+                .expectNextCount(6)
+                .verifyComplete();
     }
 
     @DisplayName("должен загружать жанры по списку id")
     @Test
     void shouldFindAllByIdIn() {
-        var found = genreRepository.findAllByIdIn(Set.of(1L, 2L));
-
-        assertThat(found)
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(
-                        new Genre(1L, "Genre1"),
-                        new Genre(2L, "Genre2")));
+        StepVerifier.create(genreRepository.findAllByIdIn(Set.of(1L, 2L)))
+                .assertNext(genre -> {
+                    assertThat(genre.getId()).isIn(1L, 2L);
+                    assertThat(genre.getName()).isIn("Genre1", "Genre2");
+                })
+                .assertNext(genre -> {
+                    assertThat(genre.getId()).isIn(1L, 2L);
+                    assertThat(genre.getName()).isIn("Genre1", "Genre2");
+                })
+                .verifyComplete();
     }
-
 }

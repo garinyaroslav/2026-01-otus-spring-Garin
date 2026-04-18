@@ -1,17 +1,19 @@
 package ru.otus.hw.repositories;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
+import org.springframework.test.annotation.DirtiesContext;
+
+import reactor.test.StepVerifier;
 import ru.otus.hw.models.Author;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DisplayName("Репозиторий авторов")
-@DataJpaTest
+@DataR2dbcTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AuthorRepositoryTest {
 
     @Autowired
@@ -20,29 +22,22 @@ class AuthorRepositoryTest {
     @DisplayName("должен загружать список всех авторов")
     @Test
     void shouldFindAll() {
-        List<Author> authors = authorRepository.findAll();
-        List<Author> expected = List.of(
-                new Author(1, "Author A", null),
-                new Author(2, "Author B", null));
-
-        assertThat(authors)
-                .usingRecursiveComparison()
-                .ignoringFields("books")
-                .isEqualTo(expected);
+        StepVerifier.create(authorRepository.findAll())
+                .expectNext(new Author(1L, "Author A"))
+                .expectNext(new Author(2L, "Author B"))
+                .expectNext(new Author(3L, "Author C"))
+                .verifyComplete();
     }
 
     @DisplayName("должен загружать автора по id")
     @Test
     void shouldFindById() {
-        var expected = new Author(1, "Author A", null);
-
-        var found = authorRepository.findById(1L);
-
-        assertThat(found).isPresent();
-        assertThat(found.get())
-                .usingRecursiveComparison()
-                .ignoringFields("books")
-                .isEqualTo(expected);
+        StepVerifier.create(authorRepository.findById(1L))
+                .assertNext(author -> {
+                    assertThat(author).isNotNull();
+                    assertThat(author.getId()).isEqualTo(1L);
+                    assertThat(author.getFullName()).isEqualTo("Author A");
+                })
+                .verifyComplete();
     }
-
 }

@@ -21,5 +21,6 @@
         <module>hw08-mongodb</module>
         <module>hw09-webmvc</module>
         <module>hw10-spa</module>
+        <module>hw11-webflux</module>
     </modules>
 </project>

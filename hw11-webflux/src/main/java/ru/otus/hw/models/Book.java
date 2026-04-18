@@ -17,12 +17,12 @@ import java.util.List;
 public class Book {
 
     @Id
-    private long id;
+    private Long id;
 
     private String title;
 
     @Column("author_id")
-    private long authorId;
+    private Long authorId;
 
     @Transient
     private Author author;
@@ -33,7 +33,7 @@ public class Book {
     @Transient
     private List<Comment> comments;
 
-    public Book(long id, String title, long authorId) {
+    public Book(Long id, String title, Long authorId) {
         this.id = id;
         this.title = title;
         this.authorId = authorId;
