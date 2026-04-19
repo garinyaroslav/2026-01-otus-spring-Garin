@@ -20,5 +20,6 @@
         <module>hw07-data-jpa</module>
         <module>hw08-mongodb</module>
         <module>hw09-webmvc</module>
+        <module>hw10-spa</module>
     </modules>
 </project>
