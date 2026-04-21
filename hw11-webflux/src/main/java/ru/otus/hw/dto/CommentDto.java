@@ -13,25 +13,21 @@ import ru.otus.hw.models.Comment;
 @NoArgsConstructor
 public class CommentDto {
 
-    private long id;
+    private Long id;
 
     private String text;
 
-    private long bookId;
+    private Long bookId;
 
     public static CommentDto of(Comment comment) {
         if (comment == null) {
             return null;
         }
 
-        long bookId = comment.getBook() != null
-                ? comment.getBook().getId()
-                : comment.getBookId();
-
         return new CommentDto(
                 comment.getId(),
                 comment.getText(),
-                bookId);
+                comment.getBookId());
     }
 
     public static List<CommentDto> fromList(List<Comment> comments) {

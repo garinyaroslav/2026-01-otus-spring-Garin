@@ -1,19 +1,26 @@
 package ru.otus.hw.models;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.util.List;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Table("books")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Book {
 
     @Id
@@ -25,13 +32,7 @@ public class Book {
     private Long authorId;
 
     @Transient
-    private Author author;
-
-    @Transient
-    private List<Genre> genres;
-
-    @Transient
-    private List<Comment> comments;
+    private List<Long> genreIds;
 
     public Book(Long id, String title, Long authorId) {
         this.id = id;

@@ -5,7 +5,10 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Comment;
+import ru.otus.hw.models.Genre;
 
 @Data
 @AllArgsConstructor
@@ -22,24 +25,16 @@ public class BookDto {
 
     private List<CommentDto> comments;
 
-    public static BookDto of(Book book) {
+    public static BookDto of(Book book, Author author, List<Genre> genres, List<Comment> comments) {
         if (book == null) {
             return null;
         }
         return new BookDto(
                 book.getId(),
                 book.getTitle(),
-                AuthorDto.of(book.getAuthor()),
-                GenreDto.fromList(book.getGenres()),
-                CommentDto.fromList(book.getComments()));
-    }
-
-    public static List<BookDto> fromList(List<Book> books) {
-        if (books == null) {
-            return List.of();
-        }
-        return books.stream().map(BookDto::of).toList();
-
+                AuthorDto.of(author),
+                GenreDto.fromList(genres),
+                CommentDto.fromList(comments));
     }
 
 }
