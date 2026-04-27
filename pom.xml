@@ -22,5 +22,6 @@
         <module>hw09-webmvc</module>
         <module>hw10-spa</module>
         <module>hw11-webflux</module>
+        <module>hw12-ss</module>
     </modules>
 </project>
