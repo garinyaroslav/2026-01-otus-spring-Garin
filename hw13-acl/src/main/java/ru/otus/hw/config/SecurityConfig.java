@@ -37,30 +37,42 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authenticationProvider(authenticationProvider())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/assets/**", "/favicon.ico").permitAll().anyRequest().authenticated())
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/books", true)
-                        .failureUrl("/login?error=true").permitAll())
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout=true").permitAll())
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            if (request.getRequestURI().startsWith("/api/")) {
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                            } else {
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                            }
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> response.sendError(HttpServletResponse.SC_FORBIDDEN)))
-                .csrf(csrf -> csrf.disable());
-
+        http.authenticationProvider(authenticationProvider());
+        configureAuthorization(http);
+        configureFormLogin(http);
+        configureLogout(http);
+        configureExceptionHandling(http);
+        http.csrf(csrf -> csrf.disable());
         return http.build();
     }
 
+    private void configureAuthorization(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login", "/assets/**", "/favicon.ico").permitAll()
+                .anyRequest().authenticated());
+    }
+
+    private void configureFormLogin(HttpSecurity http) throws Exception {
+        http.formLogin(form -> form
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/books", true)
+                .failureUrl("/login?error=true")
+                .permitAll());
+    }
+
+    private void configureLogout(HttpSecurity http) throws Exception {
+        http.logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout=true")
+                .permitAll());
+    }
+
+    private void configureExceptionHandling(HttpSecurity http) throws Exception {
+        http.exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) ->
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                .accessDeniedHandler((request, response, accessDeniedException) ->
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN)));
+    }
 }
