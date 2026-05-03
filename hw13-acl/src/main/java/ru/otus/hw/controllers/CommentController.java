@@ -1,7 +1,6 @@
 package ru.otus.hw.controllers;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +26,6 @@ public class CommentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isAuthenticated()")
     public CommentDto addComment(
             @Positive @RequestParam long bookId,
             @NotBlank(message = "Текст комментария не может быть пустым") @RequestParam String text) {
@@ -36,7 +34,6 @@ public class CommentController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteComment(@PathVariable long id) {
         commentService.deleteById(id);
     }

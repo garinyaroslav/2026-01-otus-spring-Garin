@@ -5,7 +5,6 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,14 +30,12 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
 
     @Override
-    @PreAuthorize("isAuthenticated()")
     public BookDto findById(long id) {
         return bookRepository.findById(id).map(BookDto::of)
                 .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
     }
 
     @Override
-    @PreAuthorize("isAuthenticated()")
     public List<BookDto> findAll() {
         var books = bookRepository.findAll();
         books.forEach(b -> b.getGenres().size());
@@ -47,7 +44,6 @@ public class BookServiceImpl implements BookService {
 
     @Transactional
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public BookDto insert(BookCreateDto dto) {
         Long authorId = dto.getAuthorId();
         Set<Long> genresIds = dto.getGenreIds();
@@ -71,7 +67,6 @@ public class BookServiceImpl implements BookService {
 
     @Transactional
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public BookDto update(BookUpdateDto dto) {
         Long id = dto.getId();
         Set<Long> genresIds = dto.getGenreIds();
@@ -99,7 +94,6 @@ public class BookServiceImpl implements BookService {
 
     @Transactional
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteById(long id) {
         bookRepository.deleteById(id);
     }

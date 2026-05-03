@@ -3,7 +3,6 @@ package ru.otus.hw.controllers;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,26 +28,22 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public List<BookDto> listBooks() {
         return bookService.findAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public BookDto viewBook(@PathVariable long id) {
         return bookService.findById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
     public BookDto createBook(@Valid @RequestBody BookCreateDto dto) {
         return bookService.insert(dto);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public BookDto updateBook(@PathVariable long id,
             @Valid @RequestBody BookUpdateDto dto) {
         dto.setId(id);
@@ -57,7 +52,6 @@ public class BookController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteBook(@PathVariable long id) {
         bookService.deleteById(id);
     }

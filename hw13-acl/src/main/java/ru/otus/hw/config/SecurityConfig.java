@@ -2,8 +2,8 @@ package ru.otus.hw.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,7 +16,6 @@ import ru.otus.hw.services.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -49,6 +48,10 @@ public class SecurityConfig {
     private void configureAuthorization(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/assets/**", "/favicon.ico").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/books").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/books/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/comments/**").hasRole("ADMIN")
                 .anyRequest().authenticated());
     }
 
@@ -70,9 +73,9 @@ public class SecurityConfig {
 
     private void configureExceptionHandling(HttpSecurity http) throws Exception {
         http.exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) ->
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
-                .accessDeniedHandler((request, response, accessDeniedException) ->
-                        response.sendError(HttpServletResponse.SC_FORBIDDEN)));
+                .authenticationEntryPoint(
+                        (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                .accessDeniedHandler((request, response, accessDeniedException) -> response
+                        .sendError(HttpServletResponse.SC_FORBIDDEN)));
     }
 }

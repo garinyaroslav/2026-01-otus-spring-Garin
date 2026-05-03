@@ -2,7 +2,6 @@ package ru.otus.hw.controllers;
 
 import java.util.List;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +18,6 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public List<AuthorDto> listAuthors() {
         return authorService.findAll();
     }
