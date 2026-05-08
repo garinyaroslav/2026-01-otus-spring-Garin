@@ -23,5 +23,6 @@
         <module>hw10-spa</module>
         <module>hw11-webflux</module>
         <module>hw12-ss</module>
+        <module>hw13-acl</module>
     </modules>
 </project>
