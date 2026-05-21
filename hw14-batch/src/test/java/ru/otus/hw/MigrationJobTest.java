@@ -16,6 +16,13 @@ import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import ru.otus.hw.mongoModels.AuthorMongo;
 import ru.otus.hw.mongoModels.BookMongo;
@@ -26,9 +33,20 @@ import ru.otus.hw.mongoRepositories.BookMongoRepository;
 import ru.otus.hw.mongoRepositories.CommentMongoRepository;
 import ru.otus.hw.mongoRepositories.GenreMongoRepository;
 
+@SpringBootTest(classes = Application.class)
+@ActiveProfiles("test")
 @SpringBatchTest
-@SpringBootTest
+@Testcontainers
 class MigrationJobTest {
+
+    @Container
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer(
+            DockerImageName.parse("mongo:7.0"));
+
+    @DynamicPropertySource
+    static void mongoProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    }
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
