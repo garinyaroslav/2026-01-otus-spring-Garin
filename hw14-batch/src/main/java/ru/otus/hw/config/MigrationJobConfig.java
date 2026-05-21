@@ -49,9 +49,9 @@ import ru.otus.hw.mongoRepositories.GenreMongoRepository;
 @RequiredArgsConstructor
 public class MigrationJobConfig {
 
-    private static final int CHUNK_SIZE = 10;
-
     public static final String MIGRATION_JOB_NAME = "migrationJob";
+
+    private static final int CHUNK_SIZE = 10;
 
     private final JobRepository jobRepository;
 
