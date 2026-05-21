@@ -24,5 +24,6 @@
         <module>hw11-webflux</module>
         <module>hw12-ss</module>
         <module>hw13-acl</module>
+        <module>hw14-batch</module>
     </modules>
 </project>
