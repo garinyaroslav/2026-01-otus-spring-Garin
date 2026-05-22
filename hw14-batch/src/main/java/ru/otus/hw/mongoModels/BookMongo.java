@@ -1,15 +1,17 @@
 package ru.otus.hw.mongoModels;
 
+import java.util.List;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.util.List;
 
 @Document(collection = "books")
 @Getter
@@ -32,6 +34,7 @@ public class BookMongo {
 
     private List<String> genreIds;
 
+    @Indexed(unique = true)
     private Long sourceId;
 
 }

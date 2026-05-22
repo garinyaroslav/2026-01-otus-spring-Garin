@@ -11,7 +11,10 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.flow.Flow;
+import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -23,6 +26,7 @@ import org.springframework.batch.item.data.builder.MongoItemWriterBuilder;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -81,11 +85,22 @@ public class MigrationJobConfig {
             Step migrateCommentsStep) {
         return new JobBuilder(MIGRATION_JOB_NAME, jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .start(migrateAuthorsStep)
-                .next(migrateGenresStep)
+                .start(splitAuthorsAndGenres(migrateAuthorsStep, migrateGenresStep))
                 .next(migrateBooksStep)
                 .next(migrateCommentsStep)
+                .end()
                 .listener(migrationJobListener())
+                .build();
+    }
+
+    private Flow splitAuthorsAndGenres(Step migrateAuthorsStep, Step migrateGenresStep) {
+        return new FlowBuilder<SimpleFlow>("splitAuthorsAndGenresFlow")
+                .split(new SimpleAsyncTaskExecutor("migration-"))
+                .add(
+                        new FlowBuilder<SimpleFlow>("authorsFlow")
+                                .start(migrateAuthorsStep).build(),
+                        new FlowBuilder<SimpleFlow>("genresFlow")
+                                .start(migrateGenresStep).build())
                 .build();
     }
 
