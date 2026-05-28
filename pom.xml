@@ -25,5 +25,6 @@
         <module>hw12-ss</module>
         <module>hw13-acl</module>
         <module>hw14-batch</module>
+        <module>hw15-integration</module>
     </modules>
 </project>
