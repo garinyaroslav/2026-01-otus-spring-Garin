@@ -26,5 +26,6 @@
         <module>hw13-acl</module>
         <module>hw14-batch</module>
         <module>hw15-integration</module>
+        <module>hw17-docker</module>
     </modules>
 </project>

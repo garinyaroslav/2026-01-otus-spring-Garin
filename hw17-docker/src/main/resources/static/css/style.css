@@ -1,0 +1,314 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #222;
+    background: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+nav {
+    background: #f4f4f4;
+    border-bottom: 2px solid #ccc;
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+nav .brand {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #111;
+    text-decoration: none;
+    margin-right: auto;
+}
+
+nav a {
+    color: #333;
+    text-decoration: none;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    padding: 2px 0;
+    border-bottom: 1px solid transparent;
+}
+
+nav a:hover {
+    color: #000;
+    border-bottom-color: #555;
+}
+
+main {
+    flex: 1;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+h1 {
+    font-size: 1.7rem;
+    font-weight: bold;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #ccc;
+}
+
+h2 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.8rem;
+    margin-top: 1.5rem;
+}
+
+.page-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #ccc;
+}
+
+.page-header h1 {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+}
+
+thead {
+    background: #f0f0f0;
+}
+
+thead th {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 2px solid #bbb;
+    font-weight: bold;
+}
+
+tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+tbody tr:hover {
+    background: #fafafa;
+}
+
+td {
+    padding: 0.55rem 0.8rem;
+    vertical-align: middle;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.35rem 0.9rem;
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    text-decoration: none;
+    border: 1px solid #aaa;
+    background: #f4f4f4;
+    color: #222;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn:hover {
+    background: #e8e8e8;
+}
+
+.btn-primary {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+}
+
+.btn-primary:hover {
+    background: #333;
+}
+
+.btn-danger {
+    color: #900;
+    border-color: #c88;
+    background: #fff5f5;
+}
+
+.btn-danger:hover {
+    background: #ffe0e0;
+}
+
+.btn-sm {
+    padding: 0.2rem 0.6rem;
+    font-size: 0.8rem;
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.form-card {
+    max-width: 560px;
+}
+
+.form-group {
+    margin-bottom: 1.1rem;
+}
+
+.form-group label {
+    display: block;
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+    color: #444;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    border: 1px solid #bbb;
+    background: #fff;
+    color: #222;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #555;
+}
+
+select[multiple].form-control {
+    height: 120px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.4rem;
+}
+
+.detail-card {
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+}
+
+.detail-card dl {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 0.5rem 1rem;
+}
+
+.detail-card dt {
+    font-weight: bold;
+    color: #555;
+}
+
+.detail-card dd {
+    color: #222;
+}
+
+.tag {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    background: #eee;
+    border: 1px solid #ccc;
+    font-size: 0.8rem;
+    margin: 0.1rem 0.1rem 0 0;
+}
+
+.comment-list {
+    list-style: none;
+    border: 1px solid #ddd;
+    margin-bottom: 1rem;
+}
+
+.comment-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.55rem 0.8rem;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #eee;
+}
+
+.comment-list li:last-child {
+    border-bottom: none;
+}
+
+.comment-add {
+    border: 1px solid #ddd;
+    padding: 0.8rem 1rem;
+    background: #fafafa;
+}
+
+.comment-add .inline-form {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+}
+
+.comment-add .inline-form .form-control {
+    flex: 1;
+}
+
+.confirm-box {
+    border: 1px solid #ddd;
+    padding: 2rem;
+    max-width: 460px;
+    font-family: Arial, sans-serif;
+}
+
+.confirm-box p {
+    margin: 0.8rem 0 1.5rem;
+    color: #444;
+}
+
+.error-box {
+    text-align: center;
+    padding: 4rem 1rem;
+    font-family: Arial, sans-serif;
+}
+
+.error-box h1 {
+    font-size: 4rem;
+    border: none;
+    color: #900;
+}
+
+.error-box p {
+    margin: 0.8rem 0 1.5rem;
+    color: #555;
+}
+
+footer {
+    font-family: Arial, sans-serif;
+    font-size: 0.78rem;
+    color: #888;
+    text-align: center;
+    padding: 1rem;
+    border-top: 1px solid #ddd;
+}
