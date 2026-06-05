@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:maindb
+    show-sql: true
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
+      schema-locations: classpath:schema.sql
+  h2:
+    console:
+      enabled: true
+  thymeleaf:
+    cache: false
+  data:
+    rest:
+      base-path: /data-rest
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    logfile:
+      enabled: true
+  metrics:
+    enable:
+      all: true
+
+logging:
+  file:
+    name: logs/application.log
+  level:
+    root: INFO
+    ru.otus.hw: DEBUG
