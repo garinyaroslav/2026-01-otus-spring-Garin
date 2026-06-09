@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Edit Book — Library</title>
+</head>
+<body>
+<main>
+    <div class="page-header">
+        <h1>Edit Book</h1>
+        <a th:href="@{/books}" class="btn btn-secondary">← All Books</a>
+    </div>
+
+    <div class="form-card">
+
+        <form th:action="@{'/books/' + ${bookUpdateDto.id} + '/edit'}"
+              th:object="${bookUpdateDto}"
+              method="post">
+            <div th:if="${#fields.hasErrors('*')}">
+                <strong>Please correct the following errors:</strong>
+                <ul>
+                    <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                </ul>
+            </div>
+
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input id="title" type="text" class="form-control"
+                       th:field="*{title}" placeholder="Enter book title"/>
+                <div th:if="${#fields.hasErrors('title')}" 
+                     th:errors="*{title}"></div>
+                <small>Maximum 150 characters</small>
+            </div>
+
+            <div class="form-group">
+                <label for="authorId">Author</label>
+                <select id="authorId" class="form-control" 
+                        th:field="*{authorId}">
+                    <option value="">— Select author —</option>
+                    <option th:each="author : ${authors}"
+                            th:value="${author.id}"
+                            th:text="${author.fullName}"></option>
+                </select>
+                <div th:if="${#fields.hasErrors('authorId')}" 
+                     th:errors="*{authorId}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="genreIds">Genres <span style="font-weight:300; text-transform:none;">(hold Ctrl / Cmd to select multiple)</span></label>
+                <select id="genreIds" class="form-control" 
+                        th:field="*{genreIds}" multiple>
+                    <option th:each="genre : ${genres}"
+                            th:value="${genre.id}"
+                            th:text="${genre.name}"></option>
+                </select>
+                <div th:if="${#fields.hasErrors('genreIds')}" 
+                     th:errors="*{genreIds}"></div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a th:href="@{/books}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</main>
+</body>
+</html>
