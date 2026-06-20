@@ -1,0 +1,67 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:maindb
+    show-sql: true
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
+      schema-locations: classpath:schema.sql
+  h2:
+    console:
+      enabled: true
+  thymeleaf:
+    cache: false
+
+resilience4j:
+  retry:
+    instances:
+      db:
+        max-attempts: 3
+        wait-duration: 300ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.dao.TransientDataAccessException
+          - org.springframework.dao.QueryTimeoutException
+          - org.springframework.transaction.CannotCreateTransactionException
+          - org.springframework.jdbc.CannotGetJdbcConnectionException
+          - java.sql.SQLTransientException
+        ignore-exceptions:
+          - ru.otus.hw.exceptions.EntityNotFoundException
+          - org.springframework.dao.DataIntegrityViolationException
+          - jakarta.validation.ConstraintViolationException
+          - java.lang.IllegalArgumentException
+
+  circuitbreaker:
+    instances:
+      db:
+        register-health-indicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 100
+        slow-call-duration-threshold: 2s
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - org.springframework.dao.DataAccessException
+          - org.springframework.transaction.TransactionException
+        ignore-exceptions:
+          - ru.otus.hw.exceptions.EntityNotFoundException
+          - jakarta.validation.ConstraintViolationException
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,circuitbreakers,retries
+  health:
+    circuitbreakers:
+      enabled: true

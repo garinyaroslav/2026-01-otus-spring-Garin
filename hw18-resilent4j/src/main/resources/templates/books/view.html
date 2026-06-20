@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${book.title + ' — Library'}">Book — Library</title>
+</head>
+<body>
+<main>
+    <div class="page-header">
+        <h1 th:text="${book.title}">Book Title</h1>
+        <div class="btn-group">
+            <a th:href="@{/books/{id}/edit(id=${book.id})}" class="btn btn-secondary">Edit</a>
+            <a th:href="@{/books/{id}/delete(id=${book.id})}" class="btn btn-danger">Delete</a>
+            <a th:href="@{/books}" class="btn btn-secondary">← All Books</a>
+        </div>
+    </div>
+
+    <div class="detail-card">
+        <dl>
+            <dt>Author</dt>
+            <dd th:text="${book.author.fullName}"></dd>
+
+            <dt>Genres</dt>
+            <dd>
+                <span th:each="genre : ${book.genres}"
+                      th:text="${genre.name}"
+                      class="tag"></span>
+            </dd>
+        </dl>
+    </div>
+
+    <div class="page-header" style="margin-top: 2rem;">
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 1.4rem;">Comments</h2>
+    </div>
+
+    <ul class="comment-list" th:if="${not #lists.isEmpty(book.comments)}">
+        <li th:each="comment : ${book.comments}">
+            <span th:text="${comment.text}"></span>
+            <form th:action="@{/comments/{id}/delete(id=${comment.id})}" method="post" style="display:inline;">
+                <input type="hidden" name="bookId" th:value="${book.id}"/>
+                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+            </form>
+        </li>
+    </ul>
+
+    <p th:if="${#lists.isEmpty(book.comments)}"
+       style="color: var(--muted); margin-bottom: 1.5rem; font-style: italic;">
+        No comments yet.
+    </p>
+
+    <div class="comment-add">
+        <form th:action="@{/comments/add}" method="post">
+            <input type="hidden" name="bookId" th:value="${book.id}"/>
+            <div class="inline-form">
+                <input type="text" name="text" class="form-control"
+                       placeholder="Add a comment…" required/>
+                <button type="submit" class="btn btn-primary">Post</button>
+            </div>
+        </form>
+    </div>
+</main>
+</body>
+</html>
