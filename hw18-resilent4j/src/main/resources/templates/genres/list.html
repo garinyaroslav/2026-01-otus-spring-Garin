@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Genres — Library</title>
+</head>
+<body>
+<main>
+    <div class="page-header">
+        <h1>Genres</h1>
+    </div>
+
+    <table th:if="${not #lists.isEmpty(genres)}">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="genre : ${genres}">
+            <td th:text="${genre.id}"></td>
+            <td th:text="${genre.name}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${#lists.isEmpty(genres)}" style="color: var(--muted); margin-top: 2rem;">
+        No genres found.
+    </p>
+</main>
+</body>
+</html>
